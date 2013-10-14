@@ -15,3 +15,8 @@
 *~
 *.htaccess
 *.swp
+*._*
+*.DS_Store
+
+assignments/assignment1/files/src/asgn1
+assignments/assignment1/files/src/unit-tests/UnitTest

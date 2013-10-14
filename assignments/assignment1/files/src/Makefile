@@ -1,7 +1,7 @@
 CPPFLAGS = -I.
 CXXFLAGS = -Wall -g
 
-OBJECTS = Tissue.o main.o
+OBJECTS = Tissue.o InfectionSimulator.o SimulatorUtils.o SimulationCommand.o main.o
 LIBS = fwk/BaseCollection.o fwk/BaseNotifiee.o fwk/Exception.o
 
 asgn1:	$(OBJECTS) $(LIBS)
@@ -10,5 +10,8 @@ asgn1:	$(OBJECTS) $(LIBS)
 clean:
 	rm -f asgn1 $(OBJECTS) $(LIBS) *~
 
-Tissue.o: Tissue.cpp Tissue.h
+Tissue.o: Tissue.cpp Tissue.h 
+InfectionSimulator.o: InfectionSimulator.cpp InfectionSimulator.h
+SimulatorUtils.o: SimulatorUtils.cpp SimulatorUtils.h
+SimulationCommand.o: SimulationCommand.cpp SimulationCommand.h
 main.o: main.cpp

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <queue>
 #include "Tissue.h"
+#include "InfectionSimulator.h"
 using namespace std;
 
 
@@ -18,10 +19,12 @@ int main(int argc, const char* argv[]) {
     return 1;
   }
 
+  InfectionSimulator simulator;
   //read data in, parse it, excute commands.
   string textLine;
   while(!infile.eof()){
     getline(infile, textLine);
+    simulator.commandIs(textLine);
   }
   return 0;
 }
