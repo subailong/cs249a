@@ -17,7 +17,7 @@ GUNIT_BASE += gtest-1.6.0
 GUNIT_PATH += $(GUNIT_BASE)/include
 
 # The main source file names you will need to test.
-MAIN_FILES += SimulationCommand SimulatorUtils
+MAIN_FILES += SimulationCommand SimulatorUtils InfectionSimulator
 
 # The objects corresponding to the tested files.
 MAIN_OBJ_PATH = $(addsuffix .o, $(addprefix $(SRC_PATH), $(MAIN_FILES)))
@@ -35,12 +35,12 @@ COMPILER_FLAGS += -g -Wall
 
 # This is a list of tests. You would add the name of any new tests you add here
 # and define it below.
-FILES += SimulationCommandTest SimulatorUtilsTest
+FILES += SimulationCommandTest SimulatorUtilsTest InfectionSimulatorTest
 
 # This is a list of object files.
 OBJS = $(addsuffix .o, $(FILES))
 
-LIBS = $(SRC_PATH)/Tissue.o $(SRC_PATH)/fwk/BaseCollection.o $(SRC_PATH)/fwk/BaseNotifiee.o $(SRC_PATH)/fwk/Exception.o
+LIBS = $(SRC_PATH)/Tissue.o $(SRC_PATH)/TissueReactor.o $(SRC_PATH)/fwk/BaseCollection.o $(SRC_PATH)/fwk/BaseNotifiee.o $(SRC_PATH)/fwk/Exception.o
 
 # ##################
 # Targets for each file you are testing.
@@ -50,6 +50,9 @@ SimulationCommandTest: SimulationCommandTest.cpp $(SRC_PATH)/SimulationCommand.c
 
 SimulatorUtilsTest: SimulatorUtilsTest.cpp $(SRC_PATH)/SimulatorUtils.cpp $(SRC_PATH)/SimulatorUtils.h $(SRC_PATH)/SimulatorUtils.o $(LIBS)
 	$(CXX) $(PREPROCESSOR_FLAGS) $(COMPILER_FLAGS) -c SimulatorUtilsTest.cpp
+
+InfectionSimulatorTest: InfectionSimulatorTest.cpp $(SRC_PATH)/InfectionSimulator.cpp $(SRC_PATH)/InfectionSimulator.h $(SRC_PATH)/InfectionSimulator.o $(LIBS)
+	$(CXX) $(PREPROCESSOR_FLAGS) $(COMPILER_FLAGS) -c InfectionSimulatorTest.cpp
 
 
 # ##################
