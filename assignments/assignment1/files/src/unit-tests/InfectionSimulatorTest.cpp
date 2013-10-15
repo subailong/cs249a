@@ -101,8 +101,6 @@ TEST(InfectionSimulator, helperCellNewCreatesCellMembranes) {
   ASSERT_TRUE(mem->antibodyStrength() == 0);  
 }
 
-
-
 TEST(InfectionSimulator, infectedCellsDel) {
   InfectionSimulator simulator;
   simulator.tissueNew(SimulationCommand("Tissue tissueNew Tissue1"));
@@ -131,3 +129,85 @@ TEST(InfectionSimulator, infectedCellsDel) {
   ASSERT_TRUE(tissueReactor->numCytotoxicCells() == 1);
   ASSERT_TRUE(tissueReactor->numHelperCells() == 1);
 }
+
+TEST(InfectionSimulator, cloneNewClonesCellAndMembranes) {
+  InfectionSimulator simulator;
+  simulator.tissueNew(SimulationCommand("Tissue tissueNew Tissue1"));
+  Tissue::Ptr tissue = simulator.tissue("Tissue1");
+  TissueReactor::Ptr tissueReactor = simulator.tissueReactor("Tissue1");
+  SimulationCommand cmd_c1 = SimulationCommand("Tissue Tissue1 cytotoxicCellNew 1 2 3");
+  simulator.cytotoxicCellNew(cmd_c1);
+  SimulationCommand cmd_c2 = SimulationCommand("Tissue Tissue1 helperCellNew 4 5 6");
+  simulator.helperCellNew(cmd_c2);
+  (tissue->cell(cmd_c2.coords()))->healthIs(Cell::infected());
+  
+  ASSERT_TRUE(tissueReactor->numCytotoxicCells() == 1);
+  ASSERT_TRUE(tissueReactor->numHelperCells() == 1);
+  
+  simulator.cloneNew(SimulationCommand("Cell Tissue1 1 2 3 cloneNew north"));
+  simulator.cloneNew(SimulationCommand("Cell Tissue1 4 5 6 cloneNew east"));
+  ASSERT_TRUE(tissueReactor->numCytotoxicCells() == 2);
+  ASSERT_TRUE(tissueReactor->numHelperCells() == 2);
+  
+  Cell::Coordinates clone1_coords;
+  clone1_coords.x = 1;
+  clone1_coords.y = 3;
+  clone1_coords.z = 3;
+  Cell::Coordinates clone2_coords;
+  clone2_coords.x = 5;
+  clone2_coords.y = 5;
+  clone2_coords.z = 6;
+
+  /* Check cell properties match */
+  Cell::Ptr clone1 = tissue->cell(clone1_coords);
+  ASSERT_TRUE(clone1.ptr() != NULL);
+  ASSERT_TRUE(clone1->cellType() == Cell::cytotoxicCell());
+  ASSERT_TRUE(clone1->health() == Cell::healthy());
+  /* Check cell membranes */
+  CellMembrane::Ptr mem = clone1->membrane(CellMembrane::north());
+  ASSERT_TRUE(mem.ptr() != NULL);
+  ASSERT_TRUE(mem->antibodyStrength() == 100);
+  mem = clone1->membrane(CellMembrane::south());
+  ASSERT_TRUE(mem.ptr() != NULL);
+  ASSERT_TRUE(mem->antibodyStrength() == 100);
+  mem = clone1->membrane(CellMembrane::east());
+  ASSERT_TRUE(mem.ptr() != NULL);
+  ASSERT_TRUE(mem->antibodyStrength() == 100);
+  mem = clone1->membrane(CellMembrane::west());
+  ASSERT_TRUE(mem.ptr() != NULL);
+  ASSERT_TRUE(mem->antibodyStrength() == 100);
+  mem = clone1->membrane(CellMembrane::up());
+  ASSERT_TRUE(mem.ptr() != NULL);
+  ASSERT_TRUE(mem->antibodyStrength() == 100);
+  mem = clone1->membrane(CellMembrane::down());
+  ASSERT_TRUE(mem.ptr() != NULL);
+  ASSERT_TRUE(mem->antibodyStrength() == 100);  
+ 
+  /* Check cell properties match */
+  Cell::Ptr clone2 = tissue->cell(clone2_coords);
+  ASSERT_TRUE(clone2.ptr() != NULL);
+  ASSERT_TRUE(clone2->cellType() == Cell::helperCell());
+  ASSERT_TRUE(clone2->health() == Cell::infected());
+  /* Check cell membranes */
+  mem = clone2->membrane(CellMembrane::north());
+  ASSERT_TRUE(mem.ptr() != NULL);
+  ASSERT_TRUE(mem->antibodyStrength() == 0);
+  mem = clone2->membrane(CellMembrane::south());
+  ASSERT_TRUE(mem.ptr() != NULL);
+  ASSERT_TRUE(mem->antibodyStrength() == 0);
+  mem = clone2->membrane(CellMembrane::east());
+  ASSERT_TRUE(mem.ptr() != NULL);
+  ASSERT_TRUE(mem->antibodyStrength() == 0);
+  mem = clone2->membrane(CellMembrane::west());
+  ASSERT_TRUE(mem.ptr() != NULL);
+  ASSERT_TRUE(mem->antibodyStrength() == 0);
+  mem = clone2->membrane(CellMembrane::up());
+  ASSERT_TRUE(mem.ptr() != NULL);
+  ASSERT_TRUE(mem->antibodyStrength() == 0);
+  mem = clone2->membrane(CellMembrane::down());
+  ASSERT_TRUE(mem.ptr() != NULL);
+  ASSERT_TRUE(mem->antibodyStrength() == 0);  
+}
+
+
+

@@ -39,3 +39,47 @@ TEST(SimulatorUtils, returnsSidesArray) {
   ASSERT_TRUE(sides[4] == CellMembrane::up());
   ASSERT_TRUE(sides[5] == CellMembrane::down());
 }
+
+TEST(SimulatorUtils, computesAdjecentCoordinates) {
+  Cell::Coordinates c;
+  c.x = 0;
+  c.y = 0;
+  c.z = 0;
+  
+  Cell::Coordinates cx1;
+  cx1.x = 1;
+  cx1.y = 0;
+  cx1.z = 0;
+
+  Cell::Coordinates cx2;  
+  cx2.x = -1;
+  cx2.y = 0;
+  cx2.z = 0;
+
+  Cell::Coordinates cy1;  
+  cy1.x = 0;
+  cy1.y = 1;
+  cy1.z = 0;
+
+  Cell::Coordinates cy2;  
+  cy2.x = 0;
+  cy2.y = -1;
+  cy2.z = 0;
+
+  Cell::Coordinates cz1;  
+  cz1.x = 0;
+  cz1.y = 0;
+  cz1.z = 1;
+
+  Cell::Coordinates cz2;  
+  cz2.x = 0;
+  cz2.y = 0;
+  cz2.z = -1;
+
+  ASSERT_TRUE(SimulatorUtils::adjacentCoordinates(c, CellMembrane::north()) == cy1);
+  ASSERT_TRUE(SimulatorUtils::adjacentCoordinates(c, CellMembrane::south()) == cy2);
+  ASSERT_TRUE(SimulatorUtils::adjacentCoordinates(c, CellMembrane::east()) == cx1);
+  ASSERT_TRUE(SimulatorUtils::adjacentCoordinates(c, CellMembrane::west()) == cx2);
+  ASSERT_TRUE(SimulatorUtils::adjacentCoordinates(c, CellMembrane::up()) == cz1);
+  ASSERT_TRUE(SimulatorUtils::adjacentCoordinates(c, CellMembrane::down()) == cz2);
+}

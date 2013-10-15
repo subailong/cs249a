@@ -6,6 +6,7 @@
 #include <sstream>
 #include "InfectionSimulator.h"
 #include "SimulationCommand.h"
+#include "SimulatorUtils.h"
 #include "Tissue.h"
 
 void 
@@ -58,7 +59,15 @@ InfectionSimulator::infectedCellsDel(SimulationCommand cmd){
 
 void 
 InfectionSimulator::cloneNew(SimulationCommand cmd){
-	cout << "cloneNew" << "--not implemented yet!" << endl;
+	cout << "-- cloneNew" << endl;
+	if (cmd.commandType() != SimulationCommand::cloneNew())
+		throw;
+	Tissue::Ptr tissue = tissues[cmd.tissueName()];
+	Cell::Ptr motherCell = tissue->cell(cmd.coords());
+	Cell::Coordinates cloneCoords = SimulatorUtils::adjacentCoordinates(cmd.coords(), cmd.direction());
+	Cell::Ptr cloneCell = Cell::CellNew(cloneCoords, tissue.ptr(), motherCell->cellType());
+	cloneCell->healthIs(motherCell->health());
+	tissue->cellIs(cloneCell);
 }
 
 void 

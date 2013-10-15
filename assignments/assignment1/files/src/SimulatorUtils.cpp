@@ -40,3 +40,26 @@ SimulatorUtils::sides(){
 	sides.push_back(CellMembrane::down());
 	return sides;
 }
+
+Cell::Coordinates 
+SimulatorUtils::adjacentCoordinates(Cell::Coordinates coords, CellMembrane::Side direction)
+{
+	int x = coords.x;
+	int y = coords.y;
+	int z = coords.z;
+
+	if(direction == CellMembrane::north())
+		y++;
+	else if (direction == CellMembrane::south())
+		y--;
+	else if (direction == CellMembrane::east())
+		x++;
+	else if (direction == CellMembrane::west())
+		x--;
+	else if (direction == CellMembrane::up())
+		z++;
+	else if (direction == CellMembrane::down())
+		z--;
+	return SimulatorUtils::toCoordinates(x, y, z);
+}
+
