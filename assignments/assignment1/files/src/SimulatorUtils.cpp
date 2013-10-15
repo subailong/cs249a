@@ -28,7 +28,24 @@ SimulatorUtils::toSide(string direction){
 	throw;
 }
 
-// TODO: make this a static var, dont create the vector on every call
+CellMembrane::Side 
+SimulatorUtils::oppositeSide(CellMembrane::Side side)
+{
+	if(side == CellMembrane::north())
+		return CellMembrane::south();
+	if(side == CellMembrane::south())
+		return CellMembrane::north();
+	if(side == CellMembrane::east())
+		return CellMembrane::west();
+	if(side == CellMembrane::west())
+		return CellMembrane::east();
+	if(side == CellMembrane::up())
+		return CellMembrane::down();
+	if(side == CellMembrane::down())
+		return CellMembrane::up();
+	throw;
+}
+
 vector<CellMembrane::Side> 
 SimulatorUtils::sides(){
 	vector<CellMembrane::Side> sides = vector<CellMembrane::Side>();

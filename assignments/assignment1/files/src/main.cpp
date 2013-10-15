@@ -46,7 +46,6 @@ int main(int argc, const char* argv[]) {
       else
         throw;
     }
-    // TODO: test exceptions, throw better exceptions
     catch( const exception & ex ) {
        cout << ex.what() << endl;
     }

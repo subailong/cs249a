@@ -3,7 +3,6 @@
 #include "InfectionSimulator.h"
 using namespace std;
 
-
 TEST(InfectionSimulator, newTissueCreatesTissueAndTissueReactor) {
   InfectionSimulator simulator;
   simulator.tissueNew(SimulationCommand("Tissue tissueNew Tissue1"));
@@ -280,4 +279,45 @@ TEST(InfectionSimulator, antibodyStrengthIs) {
   ASSERT_TRUE(mem->antibodyStrength() == 0);
   simulator.antibodyStrengthIs(SimulationCommand("Cell Tissue1 1 2 3 membrane up antibodyStrengthIs 50"));
   ASSERT_TRUE(mem->antibodyStrength() == 50);
+}
+
+TEST(InfectionSimulator, existsHealthyCell) {
+  InfectionSimulator simulator;
+  simulator.tissueNew(SimulationCommand("Tissue tissueNew Tissue1"));
+  Tissue::Ptr tissue = simulator.tissue("Tissue1");
+  SimulationCommand cmd_h = SimulationCommand("Tissue Tissue1 helperCellNew 0 0 0");
+  simulator.helperCellNew(cmd_h);
+  SimulationCommand cmd_i = SimulationCommand("Tissue Tissue1 helperCellNew 1 2 3");
+  simulator.helperCellNew(cmd_i);
+  (tissue->cell(cmd_i.coords()))->healthIs(Cell::infected());
+  Cell::Coordinates inexistent_cell_coords;
+  inexistent_cell_coords.x = 5;
+  inexistent_cell_coords.x = 5;
+  inexistent_cell_coords.x = 5;
+
+  ASSERT_TRUE(simulator.existsHealthyCell(tissue, cmd_h.coords()) == true);
+  ASSERT_TRUE(simulator.existsHealthyCell(tissue, cmd_i.coords()) == false);
+  ASSERT_TRUE(simulator.existsHealthyCell(tissue, inexistent_cell_coords) == false);
+}
+
+
+TEST(InfectionSimulator, healthyNeighbors) {
+  InfectionSimulator simulator;
+  simulator.tissueNew(SimulationCommand("Tissue tissueNew Tissue1"));
+  Tissue::Ptr tissue = simulator.tissue("Tissue1");
+  SimulationCommand cmd_c = SimulationCommand("Tissue Tissue1 helperCellNew 0 0 0");
+  simulator.helperCellNew(cmd_c);
+  SimulationCommand cmd_n1 = SimulationCommand("Tissue Tissue1 cytotoxicCellNew 0 1 0");
+  simulator.cytotoxicCellNew(cmd_n1);
+  SimulationCommand cmd_n2 = SimulationCommand("Tissue Tissue1 cytotoxicCellNew 1 0 0");
+  simulator.cytotoxicCellNew(cmd_n2);
+  (tissue->cell(cmd_n2.coords()))->healthIs(Cell::infected());
+  
+  Cell::Ptr c = tissue->cell(cmd_c.coords());
+  queue<BFSPair> neighbors = simulator.healthyNeighbors(tissue, c);
+  BFSPair healthyNeighbor = make_pair(tissue->cell(cmd_n1.coords()), CellMembrane::south());
+
+  ASSERT_TRUE(neighbors.size() == 1);
+  ASSERT_TRUE(neighbors.front().first == healthyNeighbor.first);
+  ASSERT_TRUE(neighbors.front().second == healthyNeighbor.second);
 }

@@ -10,6 +10,8 @@
 #include "SimulationCommand.h"
 using namespace std;
 
+typedef pair<Cell::Ptr, CellMembrane::Side> BFSPair;
+
 class InfectionSimulator{
 public: 
 	void tissueNew(SimulationCommand cmd);
@@ -24,6 +26,9 @@ public:
 	/* for testing */
 	Tissue::Ptr tissue(string tissueName);
 	TissueReactor::Ptr tissueReactor(string tissueName);
+	void cloneSingleCell(Tissue::Ptr tissue, Cell::Coordinates coords, CellMembrane::Side direction);
+	bool existsHealthyCell(Tissue::Ptr tissue, Cell::Coordinates coords);
+	queue<BFSPair> healthyNeighbors(Tissue::Ptr tissue, Cell::Ptr cell);
 protected:
 	/* instance variables */
 	map<string, Tissue::Ptr> tissues;

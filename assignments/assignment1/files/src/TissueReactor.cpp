@@ -1,9 +1,5 @@
-// #include <fstream>
-// #include <stdlib.h>
-// #include <queue>
 #include "TissueReactor.h"
 #include "SimulatorUtils.h"
-// using namespace std;
 
 void 
 TissueReactor::onCellNew(Cell::Ptr cell) {
@@ -12,7 +8,7 @@ TissueReactor::onCellNew(Cell::Ptr cell) {
    CellMembrane::Side side;
    vector<CellMembrane::Side> sides = SimulatorUtils::sides();
 
-   // increase corresponding cell counts
+   /* increase corresponding cell counts */
 	if(cell->cellType() == Cell::cytotoxicCell()){
 		numCytotoxicCells_++;
       strength = 100;
@@ -21,7 +17,7 @@ TissueReactor::onCellNew(Cell::Ptr cell) {
       numHelperCells_++;
       strength = 0;
    }
-   // initialize membranes
+   /* initialize membranes */
    for (size_t i = 0; i < sides.size(); ++i){
       side = sides[i];
       cell->membraneNew("Membrane", side);
@@ -32,14 +28,13 @@ TissueReactor::onCellNew(Cell::Ptr cell) {
 
 void 
 TissueReactor::onCellDel(Cell::Ptr cell) {
-   // decrement corresponding cell counts
+   /* decrement corresponding cell counts */
    if(cell->cellType() == Cell::cytotoxicCell())
       numCytotoxicCells_--;
    else if (cell->cellType() == Cell::helperCell())
       numHelperCells_--;
 }
 
-// CellCount TissueReactor::numCytotoxicCells(){
 U64 
 TissueReactor::numCytotoxicCells(){
 	return numCytotoxicCells_;

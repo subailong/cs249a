@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <utility>
+#include <queue>
 #include <vector>
 #include <sstream>
 #include "InfectionSimulator.h"
@@ -9,7 +11,8 @@
 #include "SimulatorUtils.h"
 #include "Tissue.h"
 
-void cloneSingleCell(Tissue::Ptr, Cell::Coordinates, CellMembrane::Side );
+int numInfectedCells(Tissue::Ptr tissue);
+int infectionSpread(Tissue::Ptr tissue);
 
 void 
 InfectionSimulator::tissueNew(SimulationCommand cmd){
@@ -40,7 +43,65 @@ InfectionSimulator::helperCellNew(SimulationCommand cmd){
 
 void 
 InfectionSimulator::infectionStartLocationIs(SimulationCommand cmd){
-	cout << "infectionStartLocationIs" << "--not implemented yet!" << endl;
+	if (cmd.commandType() != SimulationCommand::infectionStartLocationIs())
+		throw;
+	Tissue::Ptr tissue = tissues[cmd.tissueName()];
+	TissueReactor::Ptr tissueReactor = tissueReactors[cmd.tissueName()];
+	queue<BFSPair> currentBFSLevelNodes;
+	queue<BFSPair> nextBFSLevelNodes;
+	AntibodyStrength strength = cmd.strength();
+	Cell::Ptr cell;
+	CellMembrane::Side side;
+	CellMembrane::Ptr mem;
+	int strengthDelta;
+	int a = 0, b = 0, c = 0, d = 0, e = 0, f = 0, g = 0;
+	int bfsLevel = 0;
+	int maxBfsLevel = 0;
+
+	if(existsHealthyCell(tissue, cmd.coords())){
+		BFSPair p = make_pair(tissue->cell(cmd.coords()), cmd.direction());
+		nextBFSLevelNodes.push(p);
+	}
+
+	while(!currentBFSLevelNodes.empty() || !nextBFSLevelNodes.empty()){
+		if(currentBFSLevelNodes.empty()){
+			bfsLevel++;
+			currentBFSLevelNodes = nextBFSLevelNodes;
+			nextBFSLevelNodes = queue<BFSPair>();
+		}
+		while(!currentBFSLevelNodes.empty()){
+			BFSPair p = currentBFSLevelNodes.front();
+			currentBFSLevelNodes.pop();
+			cell = p.first;
+			side = p.second;
+			mem = cell->membrane(side);
+			
+			if(cell->health() == Cell::healthy()){
+				/* infection attempt */
+				b++;
+				strengthDelta = strength.value() - mem->antibodyStrength().value();
+				c += strengthDelta;
+				/* can infect */
+				if (strengthDelta > 0){
+					maxBfsLevel = (bfsLevel > maxBfsLevel) ? bfsLevel : maxBfsLevel;
+					cell->healthIs(Cell::infected());
+					queue<BFSPair> neighbors = healthyNeighbors(tissue, cell);
+					/* enqueue infectable neighbors to next BFS level queue */
+					while(!neighbors.empty()){
+						nextBFSLevelNodes.push(neighbors.front());
+						neighbors.pop();
+					}
+				}
+			}
+		}
+	}
+
+	a = numInfectedCells(tissue);
+	d = tissueReactor->numCytotoxicCells();
+	e = tissueReactor->numHelperCells();
+	f = infectionSpread(tissue);
+	g = maxBfsLevel;
+	cout << a << " " << b << " " << c << " " << d << " " << e << " " << f << " " << g << endl;
 }
 
 void 
@@ -89,7 +150,7 @@ InfectionSimulator::antibodyStrengthIs(SimulationCommand cmd){
 	Tissue::Ptr tissue = tissues[cmd.tissueName()];
 	Cell::Ptr cell = tissue->cell(cmd.coords());
 	CellMembrane::Ptr mem = cell->membrane(cmd.direction());
-	mem->antibodyStrengthIs(cmd.strength());
+	mem->antibodyStrengthIs(cmd.strength());	
 }
 
 /* for testing */
@@ -108,10 +169,74 @@ InfectionSimulator::tissueReactor(string tissueName){
 /* Helper functions */
 
 void 
-cloneSingleCell(Tissue::Ptr tissue, Cell::Coordinates coords, CellMembrane::Side direction){
+InfectionSimulator::cloneSingleCell(Tissue::Ptr tissue, Cell::Coordinates coords, CellMembrane::Side direction){
 	Cell::Ptr motherCell = tissue->cell(coords);
 	Cell::Coordinates cloneCoords = SimulatorUtils::adjacentCoordinates(coords, direction);
 	Cell::Ptr cloneCell = Cell::CellNew(cloneCoords, tissue.ptr(), motherCell->cellType());
 	cloneCell->healthIs(motherCell->health());
 	tissue->cellIs(cloneCell);
+	vector<CellMembrane::Side> sides = SimulatorUtils::sides();
+	CellMembrane::Side side;
+
+	/* copy membranes' antibodyStrenghts */
+	for (size_t i = 0; i < sides.size(); ++i){
+		side = sides[i];
+		AntibodyStrength s = motherCell->membrane(side)->antibodyStrength();
+		cloneCell->membrane(side)->antibodyStrengthIs(s);
+   	}
+}
+
+bool 
+InfectionSimulator::existsHealthyCell(Tissue::Ptr tissue, Cell::Coordinates coords){
+	Cell::Ptr cell = tissue->cell(coords);
+	return cell.ptr() && (cell->health() == Cell::healthy());
+}
+
+queue<BFSPair>
+InfectionSimulator::healthyNeighbors(Tissue::Ptr tissue, Cell::Ptr cell){
+	queue<BFSPair> q;
+	vector<CellMembrane::Side> sides = SimulatorUtils::sides();
+	for (size_t i = 0; i < sides.size(); ++i){
+		CellMembrane::Side side = sides[i];
+		CellMembrane::Side oppositeSide = SimulatorUtils::oppositeSide(side);
+		Cell::Coordinates adjacentCoords = SimulatorUtils::adjacentCoordinates(cell->location(), side);
+		if (existsHealthyCell(tissue, adjacentCoords)){
+			BFSPair p = make_pair(tissue->cell(adjacentCoords), oppositeSide);
+			q.push(p);
+		}
+   	}
+   	return q;
+}
+
+int 
+numInfectedCells(Tissue::Ptr tissue){
+	int count = 0;
+
+	for (Tissue::CellIteratorConst cell = tissue->cellIterConst(); cell; ++cell) {
+		if (cell->health() == Cell::infected())
+			count++;
+   	}
+
+	return count;
+}
+
+int 
+infectionSpread(Tissue::Ptr tissue){
+	int x_max = -51, y_max = -51, z_max = -51;
+	int x_min = 51, y_min = 51, z_min = 51;
+	bool foundInfection = false;
+	for (Tissue::CellIteratorConst cell = tissue->cellIterConst(); cell; ++cell) {
+		if (cell->health() == Cell::infected()){
+			foundInfection = true;
+			Cell::Coordinates coords = cell->location();
+			x_max = (coords.x > x_max) ? coords.x : x_max;
+			x_min = (coords.x < x_min) ? coords.x : x_min;
+			y_max = (coords.y > y_max) ? coords.y : y_max;
+			y_min = (coords.y < y_min) ? coords.y : y_min;
+			z_max = (coords.z > z_max) ? coords.z : z_max;
+			z_min = (coords.z < z_min) ? coords.z : z_min;
+		}
+   	}
+   	int spread = foundInfection ? (x_max - x_min + 1) * (y_max - y_min + 1) * (z_max - z_min + 1) : 0;
+	return spread;
 }
