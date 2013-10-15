@@ -28,6 +28,7 @@ SimulatorUtils::toSide(string direction){
 	throw;
 }
 
+// TODO: make this a static var, dont create the vector on every call
 vector<CellMembrane::Side> 
 SimulatorUtils::sides(){
 	vector<CellMembrane::Side> sides = vector<CellMembrane::Side>();

@@ -77,7 +77,6 @@ TEST(InfectionSimulator, helperCellNewCreatesCellMembranes) {
   InfectionSimulator simulator;
   simulator.tissueNew(SimulationCommand("Tissue tissueNew Tissue1"));
   Tissue::Ptr tissue = simulator.tissue("Tissue1");
-  TissueReactor::Ptr tissueReactor = simulator.tissueReactor("Tissue1");
   SimulationCommand cmd = SimulationCommand("Tissue Tissue1 helperCellNew 1 2 3");
   simulator.helperCellNew(cmd);
   Cell::Ptr cell = tissue->cell(cmd.coords());  
@@ -103,3 +102,32 @@ TEST(InfectionSimulator, helperCellNewCreatesCellMembranes) {
 }
 
 
+
+TEST(InfectionSimulator, infectedCellsDel) {
+  InfectionSimulator simulator;
+  simulator.tissueNew(SimulationCommand("Tissue tissueNew Tissue1"));
+  Tissue::Ptr tissue = simulator.tissue("Tissue1");
+  TissueReactor::Ptr tissueReactor = simulator.tissueReactor("Tissue1");
+  SimulationCommand cmd_c1 = SimulationCommand("Tissue Tissue1 cytotoxicCellNew 1 2 3");
+  simulator.cytotoxicCellNew(cmd_c1);
+  SimulationCommand cmd_c2 = SimulationCommand("Tissue Tissue1 cytotoxicCellNew 2 3 4");
+  simulator.cytotoxicCellNew(cmd_c2);
+  (tissue->cell(cmd_c2.coords()))->healthIs(Cell::infected());
+  SimulationCommand cmd_h1 = SimulationCommand("Tissue Tissue1 helperCellNew 3 4 5");
+  simulator.helperCellNew(cmd_h1);
+  SimulationCommand cmd_h2 = SimulationCommand("Tissue Tissue1 helperCellNew 4 5 6");
+  simulator.helperCellNew(cmd_h2);
+  (tissue->cell(cmd_h2.coords()))->healthIs(Cell::infected());
+  
+  ASSERT_TRUE(tissueReactor->numCytotoxicCells() == 2);
+  ASSERT_TRUE(tissueReactor->numHelperCells() == 2);
+  
+  simulator.infectedCellsDel(SimulationCommand("Tissue Tissue1 infectedCellsDel"));
+  
+  ASSERT_TRUE((tissue->cell(cmd_c2.coords())).ptr() == NULL);
+  ASSERT_TRUE((tissue->cell(cmd_h2.coords())).ptr() == NULL);
+  ASSERT_TRUE((tissue->cell(cmd_c1.coords())).ptr() != NULL);
+  ASSERT_TRUE((tissue->cell(cmd_h1.coords())).ptr() != NULL);
+  ASSERT_TRUE(tissueReactor->numCytotoxicCells() == 1);
+  ASSERT_TRUE(tissueReactor->numHelperCells() == 1);
+}

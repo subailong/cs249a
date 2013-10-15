@@ -45,7 +45,15 @@ InfectionSimulator::infectionStartLocationIs(SimulationCommand cmd){
 
 void 
 InfectionSimulator::infectedCellsDel(SimulationCommand cmd){
-	cout << "infectedCellsDel" << "--not implemented yet!" << endl;
+	cout << "-- infectedCellsDel" << endl;
+	if (cmd.commandType() != SimulationCommand::infectedCellsDel())
+		throw;
+	Tissue::Ptr tissue = tissues[cmd.tissueName()];
+	for (Tissue::CellIteratorConst cell = tissue->cellIterConst(); cell; ++cell) {
+		if (cell->health() == Cell::infected()){
+			tissue->cellDel(cell->name());
+		}
+   	}
 }
 
 void 

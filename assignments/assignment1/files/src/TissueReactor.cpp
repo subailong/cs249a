@@ -12,7 +12,7 @@ TissueReactor::onCellNew(Cell::Ptr cell) {
    CellMembrane::Side side;
    vector<CellMembrane::Side> sides = SimulatorUtils::sides();
 
-   // increase cell counts
+   // increase corresponding cell counts
 	if(cell->cellType() == Cell::cytotoxicCell()){
 		numCytotoxicCells_++;
       strength = 100;
@@ -32,7 +32,11 @@ TissueReactor::onCellNew(Cell::Ptr cell) {
 
 void 
 TissueReactor::onCellDel(Cell::Ptr cell) {
-   cout << "Deleted cell." << endl;
+   // decrement corresponding cell counts
+   if(cell->cellType() == Cell::cytotoxicCell())
+      numCytotoxicCells_--;
+   else if (cell->cellType() == Cell::helperCell())
+      numHelperCells_--;
 }
 
 // CellCount TissueReactor::numCytotoxicCells(){
