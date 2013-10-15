@@ -2,7 +2,8 @@
 
 #include "SimulatorUtils.h"
 
-Cell::Coordinates SimulatorUtils::coordinates(int x, int y, int z){
+Cell::Coordinates 
+SimulatorUtils::toCoordinates(int x, int y, int z){
 	Cell::Coordinates c;
 	c.x = x;
 	c.y = y;
@@ -10,19 +11,31 @@ Cell::Coordinates SimulatorUtils::coordinates(int x, int y, int z){
 	return c;
 }
 
-CellMembrane::Side SimulatorUtils::side(string direction){
+CellMembrane::Side 
+SimulatorUtils::toSide(string direction){
 	if (direction == "north")
-		return CellMembrane::north_;
+		return CellMembrane::north();
 	if (direction == "south")
-		return CellMembrane::south_;
+		return CellMembrane::south();
 	if (direction == "east")
-		return CellMembrane::east_;
+		return CellMembrane::east();
 	if (direction == "west")
-		return CellMembrane::west_;
+		return CellMembrane::west();
 	if (direction == "up")
-		return CellMembrane::up_;
+		return CellMembrane::up();
 	if (direction == "down")
-		return CellMembrane::down_;
+		return CellMembrane::down();
 	throw;
 }
 
+vector<CellMembrane::Side> 
+SimulatorUtils::sides(){
+	vector<CellMembrane::Side> sides = vector<CellMembrane::Side>();
+	sides.push_back(CellMembrane::north());
+	sides.push_back(CellMembrane::south());
+	sides.push_back(CellMembrane::east());
+	sides.push_back(CellMembrane::west());
+	sides.push_back(CellMembrane::up());
+	sides.push_back(CellMembrane::down());
+	return sides;
+}

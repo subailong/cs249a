@@ -24,37 +24,27 @@ int main(int argc, const char* argv[]) {
   while(!infile.eof()){
     getline(infile, textLine);
     try {
-      SimulationCommand cmd = SimulationCommand(textLine);
-      switch(cmd.type){
-        case SimulationCommand::noOp_:
-          break;
-        case SimulationCommand::tissueNew_:
-          simulator.tissueNew(cmd);
-          break;
-        case SimulationCommand::cytotoxicCellNew_:
-          cout << "cytotoxicCellNew" << endl;
-          break;
-        case SimulationCommand::helperCellNew_:
-          cout << "helperCellNew" << endl;
-          break;
-        case SimulationCommand::infectionStartLocationIs_:
-          cout << "infectionStartLocationIs" << endl;
-          break;
-        case SimulationCommand::infectedCellsDel_:
-          cout << "infectedCellsDel" << endl;
-          break;
-        case SimulationCommand::cloneNew_:
-          cout << "cloneNew" << endl;
-          break;
-        case SimulationCommand::cloneCellsNew_:
-          cout << "cloneCellsNew" << endl;
-          break;
-        case SimulationCommand::antibodyStrengthIs_:
-          cout << "antibodyStrengthIs" << endl;
-          break;
-        default:
-          throw;
-      }
+      SimulationCommand cmd = SimulationCommand(textLine);  
+      if (cmd.commandType() == SimulationCommand::noOp())
+        continue;
+      else if (cmd.commandType() == SimulationCommand::tissueNew())
+        simulator.tissueNew(cmd);
+      else if (cmd.commandType() == SimulationCommand::cytotoxicCellNew())
+        simulator.cytotoxicCellNew(cmd);
+      else if (cmd.commandType() == SimulationCommand::helperCellNew())
+        simulator.helperCellNew(cmd);
+      else if (cmd.commandType() == SimulationCommand::infectionStartLocationIs())
+        simulator.infectionStartLocationIs(cmd);
+      else if (cmd.commandType() == SimulationCommand::infectedCellsDel())
+        simulator.infectedCellsDel(cmd);
+      else if (cmd.commandType() == SimulationCommand::cloneNew())
+        simulator.cloneNew(cmd);
+      else if (cmd.commandType() == SimulationCommand::cloneCellsNew())
+        simulator.cloneCellsNew(cmd);
+      else if (cmd.commandType() == SimulationCommand::antibodyStrengthIs())
+        simulator.antibodyStrengthIs(cmd);
+      else
+        throw;
     }
     // TODO: test exceptions, throw better exceptions
     catch( const exception & ex ) {

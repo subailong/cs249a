@@ -13,6 +13,13 @@ using namespace std;
 class InfectionSimulator{
 public: 
 	void tissueNew(SimulationCommand cmd);
+	void cytotoxicCellNew(SimulationCommand cmd);
+	void helperCellNew(SimulationCommand cmd);
+	void infectionStartLocationIs(SimulationCommand cmd);
+	void infectedCellsDel(SimulationCommand cmd);
+	void cloneNew(SimulationCommand cmd);
+	void cloneCellsNew(SimulationCommand cmd);
+	void antibodyStrengthIs(SimulationCommand cmd);
 
 	/* for testing */
 	Tissue::Ptr tissue(string tissueName);
