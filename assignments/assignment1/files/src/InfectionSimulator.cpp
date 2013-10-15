@@ -9,6 +9,8 @@
 #include "SimulatorUtils.h"
 #include "Tissue.h"
 
+void cloneSingleCell(Tissue::Ptr, Cell::Coordinates, CellMembrane::Side );
+
 void 
 InfectionSimulator::tissueNew(SimulationCommand cmd){
 	cout << "-- tissueNew" << endl;
@@ -50,10 +52,14 @@ InfectionSimulator::infectedCellsDel(SimulationCommand cmd){
 	if (cmd.commandType() != SimulationCommand::infectedCellsDel())
 		throw;
 	Tissue::Ptr tissue = tissues[cmd.tissueName()];
+	vector<string> cellsToDelete;
 	for (Tissue::CellIteratorConst cell = tissue->cellIterConst(); cell; ++cell) {
 		if (cell->health() == Cell::infected()){
-			tissue->cellDel(cell->name());
+			cellsToDelete.push_back(cell->name());
 		}
+   	}
+	for (size_t i = 0; i < cellsToDelete.size(); ++i) {
+		tissue->cellDel(cellsToDelete[i]);
    	}
 }
 
@@ -62,17 +68,24 @@ InfectionSimulator::cloneNew(SimulationCommand cmd){
 	cout << "-- cloneNew" << endl;
 	if (cmd.commandType() != SimulationCommand::cloneNew())
 		throw;
-	Tissue::Ptr tissue = tissues[cmd.tissueName()];
-	Cell::Ptr motherCell = tissue->cell(cmd.coords());
-	Cell::Coordinates cloneCoords = SimulatorUtils::adjacentCoordinates(cmd.coords(), cmd.direction());
-	Cell::Ptr cloneCell = Cell::CellNew(cloneCoords, tissue.ptr(), motherCell->cellType());
-	cloneCell->healthIs(motherCell->health());
-	tissue->cellIs(cloneCell);
+	cloneSingleCell(tissues[cmd.tissueName()], cmd.coords(), cmd.direction());
 }
 
 void 
 InfectionSimulator::cloneCellsNew(SimulationCommand cmd){
-	cout << "cloneCellsNew" << "--not implemented yet!" << endl;
+	cout << "-- cloneCellsNew" << endl;
+	if (cmd.commandType() != SimulationCommand::cloneCellsNew())
+		throw;
+	Tissue::Ptr tissue = tissues[cmd.tissueName()];
+	vector<Cell::Coordinates> cellsToClone;
+	for (Tissue::CellIteratorConst cell = tissue->cellIterConst(); cell; ++cell)
+		cellsToClone.push_back(cell->location());
+	for (size_t i = 0; i < cellsToClone.size(); ++i) {
+		try{
+			cloneSingleCell(tissue, cellsToClone[i], cmd.direction());
+		}
+		catch(Fwk::NameInUseException) {}
+	}
 }
 
 void 
@@ -89,4 +102,17 @@ InfectionSimulator::tissue(string tissueName){
 TissueReactor::Ptr 
 InfectionSimulator::tissueReactor(string tissueName){
 	return tissueReactors[tissueName];
+}
+
+
+
+/* Helper functions */
+
+void 
+cloneSingleCell(Tissue::Ptr tissue, Cell::Coordinates coords, CellMembrane::Side direction){
+	Cell::Ptr motherCell = tissue->cell(coords);
+	Cell::Coordinates cloneCoords = SimulatorUtils::adjacentCoordinates(coords, direction);
+	Cell::Ptr cloneCell = Cell::CellNew(cloneCoords, tissue.ptr(), motherCell->cellType());
+	cloneCell->healthIs(motherCell->health());
+	tissue->cellIs(cloneCell);
 }
