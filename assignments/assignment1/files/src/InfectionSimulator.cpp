@@ -13,7 +13,6 @@ void cloneSingleCell(Tissue::Ptr, Cell::Coordinates, CellMembrane::Side );
 
 void 
 InfectionSimulator::tissueNew(SimulationCommand cmd){
-	cout << "-- tissueNew" << endl;
 	if (cmd.commandType() != SimulationCommand::tissueNew()) 
 		throw;
 	Tissue::Ptr tissue = Tissue::TissueNew(cmd.tissueName());
@@ -23,7 +22,6 @@ InfectionSimulator::tissueNew(SimulationCommand cmd){
 
 void 
 InfectionSimulator::cytotoxicCellNew(SimulationCommand cmd){
-	cout << "-- cytotoxicCellNew" << endl;
 	if (cmd.commandType() != SimulationCommand::cytotoxicCellNew())
 		throw;
 	Tissue::Ptr tissue = tissues[cmd.tissueName()];
@@ -33,7 +31,6 @@ InfectionSimulator::cytotoxicCellNew(SimulationCommand cmd){
 
 void 
 InfectionSimulator::helperCellNew(SimulationCommand cmd){
-	cout << "-- helperCellNew" << endl;
 	if (cmd.commandType() != SimulationCommand::helperCellNew())
 		throw;
 	Tissue::Ptr tissue = tissues[cmd.tissueName()];
@@ -48,7 +45,6 @@ InfectionSimulator::infectionStartLocationIs(SimulationCommand cmd){
 
 void 
 InfectionSimulator::infectedCellsDel(SimulationCommand cmd){
-	cout << "-- infectedCellsDel" << endl;
 	if (cmd.commandType() != SimulationCommand::infectedCellsDel())
 		throw;
 	Tissue::Ptr tissue = tissues[cmd.tissueName()];
@@ -65,7 +61,6 @@ InfectionSimulator::infectedCellsDel(SimulationCommand cmd){
 
 void 
 InfectionSimulator::cloneNew(SimulationCommand cmd){
-	cout << "-- cloneNew" << endl;
 	if (cmd.commandType() != SimulationCommand::cloneNew())
 		throw;
 	cloneSingleCell(tissues[cmd.tissueName()], cmd.coords(), cmd.direction());
@@ -73,7 +68,6 @@ InfectionSimulator::cloneNew(SimulationCommand cmd){
 
 void 
 InfectionSimulator::cloneCellsNew(SimulationCommand cmd){
-	cout << "-- cloneCellsNew" << endl;
 	if (cmd.commandType() != SimulationCommand::cloneCellsNew())
 		throw;
 	Tissue::Ptr tissue = tissues[cmd.tissueName()];
@@ -90,7 +84,12 @@ InfectionSimulator::cloneCellsNew(SimulationCommand cmd){
 
 void 
 InfectionSimulator::antibodyStrengthIs(SimulationCommand cmd){
-	cout << "antibodyStrengthIs" << "--not implemented yet!" << endl;
+	if (cmd.commandType() != SimulationCommand::antibodyStrengthIs())
+		throw;
+	Tissue::Ptr tissue = tissues[cmd.tissueName()];
+	Cell::Ptr cell = tissue->cell(cmd.coords());
+	CellMembrane::Ptr mem = cell->membrane(cmd.direction());
+	mem->antibodyStrengthIs(cmd.strength());
 }
 
 /* for testing */

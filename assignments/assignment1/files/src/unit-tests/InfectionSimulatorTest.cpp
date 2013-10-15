@@ -267,3 +267,17 @@ TEST(InfectionSimulator, cloneCellsNewClonesAllCellsInTissue) {
   ASSERT_TRUE(clone4->cellType() == Cell::helperCell());
   ASSERT_TRUE(clone4->health() == Cell::infected());
 }
+
+TEST(InfectionSimulator, antibodyStrengthIs) {
+  InfectionSimulator simulator;
+  simulator.tissueNew(SimulationCommand("Tissue tissueNew Tissue1"));
+  Tissue::Ptr tissue = simulator.tissue("Tissue1");
+  SimulationCommand cmd = SimulationCommand("Tissue Tissue1 helperCellNew 1 2 3");
+  simulator.helperCellNew(cmd);
+  Cell::Ptr cell = tissue->cell(cmd.coords());  
+  CellMembrane::Ptr mem = cell->membrane(CellMembrane::up());
+
+  ASSERT_TRUE(mem->antibodyStrength() == 0);
+  simulator.antibodyStrengthIs(SimulationCommand("Cell Tissue1 1 2 3 membrane up antibodyStrengthIs 50"));
+  ASSERT_TRUE(mem->antibodyStrength() == 50);
+}
